@@ -21,7 +21,7 @@ namespace demo
 	{
 		physics::material material;
 		material.density = 1.0;
-		material.restitution = 0.75;
+		material.restitution = 0.8;
 
 		physics::shape_ptr square_shape = physics::make_rect(1, 1);
 		physics::body* square_body = world.create_body(std::move(square_shape), material, physics::dynamic_body);

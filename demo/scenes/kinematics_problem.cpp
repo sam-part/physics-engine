@@ -6,7 +6,7 @@ namespace demo
 		: scene(world)
 	{
 		scene_defaults.default_pan = { 25, -10 };
-		scene_defaults.default_scale = 25.0;
+		scene_defaults.default_scale = 20.0;
 	}
 
 	void kinematics_problem_scene::start()

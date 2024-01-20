@@ -149,7 +149,7 @@ namespace physics
 
 		body_b->velocity = vec_add(body_b->velocity, vec_mul(impulse, inv_mass_b));
 		body_b->angular_velocity += inv_inertia_b * vec_cross(rb, impulse);
-		
+
 		// Calculate tangential vector
 		vec_2d tangent = vec_sub(relative_vel, vec_mul(collision.normal, vec_dot(relative_vel, collision.normal)));
 
@@ -210,12 +210,9 @@ namespace physics
 
 			// O(n^2) collision detection
 			// Can be improved with a broad-phase narrow-phase approach
-			for (size_t i = 0; i < bodies.size(); i++)
+			for (size_t i = 0; i < bodies.size() - 1; i++)
 			{
-				if (bodies[i].type == body_type::static_body)
-					continue;
-
-				for (size_t j = 0; j < bodies.size(); j++)
+				for (size_t j = i + 1; j < bodies.size(); j++)
 				{
 					if (i == j)
 						continue;

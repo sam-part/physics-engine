@@ -30,7 +30,7 @@ namespace demo
 	{
 		world.clear();
 
-		world.set_gravity(physics::default_gravity);
+		world.set_gravity(world_gravity);
 
 		scene_index = index;
 		scene = std::move(scenes[index].create_scene());
@@ -64,14 +64,17 @@ namespace demo
 			return;
 		}
 
-		if (ImGui::TreeNodeEx("Scenes", ImGuiTreeNodeFlags_DefaultOpen))
+		if (ImGui::TreeNodeEx("General", ImGuiTreeNodeFlags_DefaultOpen))
 		{
-			for (size_t index = 0; index < scenes.size(); index++)
+			if (ImGui::Button(paused ? "Play" : "Pause"))
 			{
-				if (ImGui::Selectable(scenes[index].name.c_str(), index == scene_index))
-				{
-					set_scene(index);
-				}
+				paused = !paused;
+			}
+
+			ImGui::SameLine();
+			if (ImGui::Button("Reset"))
+			{
+				set_scene(scene_index);
 			}
 
 			ImGui::TreePop();
@@ -79,16 +82,56 @@ namespace demo
 
 		ImGui::NewLine();
 
-
-		if (ImGui::Button(paused ? "Play" : "Pause"))
+		if (ImGui::BeginTabBar("Physics Engine Demo"))
 		{
-			paused = !paused;
-		}
+			if (ImGui::BeginTabItem("Scene"))
+			{
+				on_scene_tab = true;
 
-		ImGui::SameLine();
-		if (ImGui::Button("Reset"))
-		{
-			set_scene(scene_index);
+				if (ImGui::TreeNodeEx("Scenes", ImGuiTreeNodeFlags_DefaultOpen))
+				{
+					for (size_t index = 0; index < scenes.size(); index++)
+					{
+						if (ImGui::Selectable(scenes[index].name.c_str(), index == scene_index))
+						{
+							set_scene(index);
+						}
+					}
+
+					ImGui::TreePop();
+				}
+
+				ImGui::EndTabItem();
+			}
+			else
+			{
+				on_scene_tab = false;
+			}
+
+			if (ImGui::BeginTabItem("World"))
+			{
+				ImGui::PushItemWidth(160);
+
+				ImGui::Text("Gravity");
+				if (ImGui::InputDouble("##Gravity", &world_gravity.y, 0.1, 0, "%.3f m/s^2", ImGuiInputTextFlags_EnterReturnsTrue))
+				{
+					world.set_gravity(world_gravity);
+				}
+				ImGui::NewLine();
+
+				int temp_iterations_per_frame = iterations_per_frame;
+				ImGui::Text("Engine updates per frame");
+				if (ImGui::InputInt("##Iterations", &temp_iterations_per_frame, 1, 1, ImGuiInputTextFlags_EnterReturnsTrue))
+				{
+					iterations_per_frame = std::max(temp_iterations_per_frame, 1);
+				}
+
+				ImGui::PopItemWidth();
+
+				ImGui::EndTabItem();
+			}
+
+			ImGui::EndTabBar();
 		}
 
 		ImGui::End();
@@ -129,6 +172,7 @@ namespace demo
 		// Initialize application scenes
 		initialize_scenes();
 
+		physics::timer timer;
 		running = true;
 
 		// Main application loop
@@ -211,6 +255,15 @@ namespace demo
 
 			prev_mouse_pos = mouse_pos;
 
+			frame_counter++;
+			if (timer.elapsed<std::chrono::seconds>() >= 1.0)
+			{
+				timer.reset();
+				fps = frame_counter;
+				frame_counter = 0;
+				std::cout << fps << "\n";
+			}
+
 			// Update scene
 			if (scene && (!paused || scene->updates_on_pause()))
 				scene->update_scene(events, *this);
@@ -218,6 +271,8 @@ namespace demo
 			// Update world
 			if (!paused)
 			{
+				double dt = 1.0 / (max_fps * iterations_per_frame);
+
 				for (size_t substep = 0; substep < iterations_per_frame; substep++)
 				{
 					world.step(dt, 1);
@@ -274,7 +329,7 @@ namespace demo
 			ImGui::NewFrame();
 
 			menu(world.get_step_performance());
-			if(scene && menu_open)
+			if(scene && menu_open && on_scene_tab)
 				scene->update_menu();
 
 			ImGui::Render();

@@ -41,8 +41,7 @@ namespace demo
 		bool running = false;
 
 		const int max_fps = 60;
-		const int iterations_per_frame = 10;
-		const double dt = 1.0 / (max_fps * iterations_per_frame);
+		int iterations_per_frame = 10;
 
 		sf::Vector2f pan {0, 0};
 		float scale = 50.0;
@@ -51,13 +50,19 @@ namespace demo
 		sf::Vector2i prev_mouse_pos {0, 0};
 		
 		physics::world world;
+		physics::vec_2d world_gravity {physics::default_gravity};
 		
 		std::vector<demo::scene_info> scenes {};
 		scene_ptr scene { nullptr };
 		size_t scene_index { 0 };
 		bool menu_open = true;
+		bool on_scene_tab = false;
 		bool paused = false;
 		bool draw_collision_points = false;
+
+		//double remove_object_height = -1000.0;
+		size_t fps = 0;
+		size_t frame_counter = 0;
 
 		void initialize_scenes();
 		void set_scene(size_t index);
