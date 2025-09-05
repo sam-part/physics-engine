@@ -8,7 +8,7 @@ Using Newtonian mechanics, the engine accurately models:
 - Collisions
 - Rotational movement
 - Circles and arbitrary convex polygons
-- Customize material density, friction/restitution coefficients
+- Custom material density, friction/restitution coefficients
 
 ## Demo
 https://github.com/user-attachments/assets/f4fb36ec-29e9-46d1-b7df-f56fe0014f1c
